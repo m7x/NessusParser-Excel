@@ -382,7 +382,7 @@ def generate_worksheets():  # pylint: disable=too-many-statements, too-many-bran
     ws_names = ["Overview", "Graphs", "Full Report",
                 "CVSS Overview", "Device Type", "Critical",
                 "High", "Medium", "Low",
-                "Informational", "MS Running Process Info",
+                "Informational",
                 "Plugin Counts", "Graph Data"]
     for sheet in ws_names:
         ColorPrint.print_bold("\tCreating {0} worksheet".format(sheet))
@@ -470,6 +470,7 @@ def generate_worksheets():  # pylint: disable=too-many-statements, too-many-bran
             active_ws.write(4, 0, 'Index', CENTER_BORDER_FORMAT)
             active_ws.write(4, 1, 'File', CENTER_BORDER_FORMAT)
             active_ws.write(4, 2, 'IP Address', CENTER_BORDER_FORMAT)
+            active_ws.write(4, 3, 'FQDN', CENTER_BORDER_FORMAT)
             active_ws.write(4, 3, 'Total', CENTER_BORDER_FORMAT)
             active_ws.write(4, 4, 'Base Total', CENTER_BORDER_FORMAT)
             active_ws.write(4, 5, 'Temporal Total', CENTER_BORDER_FORMAT)
@@ -573,13 +574,14 @@ def generate_worksheets():  # pylint: disable=too-many-statements, too-many-bran
         active_ws.write(1, 1, 'File', CENTER_BORDER_FORMAT)
         active_ws.write(1, 2, 'IP Address', CENTER_BORDER_FORMAT)
         active_ws.write(1, 3, 'Port', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 4, 'Vuln Publication Date', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 5, 'Plugin ID', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 6, 'Plugin Name', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 7, 'Exploit Avaiable', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 8, 'Exploit by Malware', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 9, 'CVE Information', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 10, 'Bugtraq ID Information', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 4, 'FQDN', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 5, 'Vuln Publication Date', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 6, 'Plugin ID', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 7, 'Plugin Name', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 8, 'Exploit Avaiable', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 9, 'Exploit by Malware', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 10, 'CVE Information', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 11, 'Bugtraq ID Information', CENTER_BORDER_FORMAT)
 
         active_ws.freeze_panes('C3')
         active_ws.autofilter('A2:J2')
@@ -587,13 +589,14 @@ def generate_worksheets():  # pylint: disable=too-many-statements, too-many-bran
         active_ws.set_column('B:B', 35)
         active_ws.set_column('C:C', 15)
         active_ws.set_column('D:D', 15)
-        active_ws.set_column('E:E', 15)
+        active_ws.set_column('E:E', 35)
         active_ws.set_column('F:F', 15)
-        active_ws.set_column('G:G', 100)
-        active_ws.set_column('H:H', 25)
+        active_ws.set_column('G:G', 15)
+        active_ws.set_column('H:H', 100)
         active_ws.set_column('I:I', 25)
         active_ws.set_column('J:J', 25)
         active_ws.set_column('K:K', 25)
+        active_ws.set_column('L:L', 25)
 
     active_ws = None
 
@@ -869,16 +872,17 @@ def add_vuln_info(vuln_list, the_file):
             vuln_ws.write(temp_cnt, 1, the_file, WRAP_TEXT_FORMAT)
             vuln_ws.write(temp_cnt, 2, vuln['host-ip'], WRAP_TEXT_FORMAT)
             vuln_ws.write(temp_cnt, 3, int(vuln['port']), NUMBER_FORMAT)
-            vuln_ws.write(temp_cnt, 4, vuln[
+            vuln_ws.write(temp_cnt, 4, vuln['host-fqdn'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 5, vuln[
                 'vuln_publication_date'], WRAP_TEXT_FORMAT)
-            vuln_ws.write(temp_cnt, 5, int(vuln['pluginID']), NUMBER_FORMAT)
-            vuln_ws.write(temp_cnt, 6, vuln['pluginName'], WRAP_TEXT_FORMAT)
-            vuln_ws.write(temp_cnt, 7, vuln[
-                'exploit_available'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 6, int(vuln['pluginID']), NUMBER_FORMAT)
+            vuln_ws.write(temp_cnt, 7, vuln['pluginName'], WRAP_TEXT_FORMAT)
             vuln_ws.write(temp_cnt, 8, vuln[
+                'exploit_available'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 9, vuln[
                 'exploited_by_malware'], WRAP_TEXT_FORMAT)
-            vuln_ws.write(temp_cnt, 9, vuln['cve'], WRAP_TEXT_FORMAT)
-            vuln_ws.write(temp_cnt, 10, vuln['bid'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 10, vuln['cve'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 11, vuln['bid'], WRAP_TEXT_FORMAT)
             temp_cnt += 1
         ROW_TRACKER[value] = temp_cnt
 
@@ -945,7 +949,8 @@ def begin_parsing():  # pylint: disable=c-extension-no-member
             add_vuln_info(vuln_data, report)
             add_cvss_info(host_cvss, report)
             add_device_type(device_data, report)
-            add_ms_process_info(ms_process_info, report)
+            # Not required but it could be useful in the future
+            #add_ms_process_info(ms_process_info, report)
             vuln_data = None
             device_data = None
             ms_process_info = None
@@ -996,10 +1001,13 @@ if __name__ == "__main__":
             ColorPrint.print_fail("Error reading Ignore Plugin Id's fle" +
                                   "please ensure format is on ID per line")
             sys.exit()
-    if os.path.isfile("{0}.xlsx".format(ARGS.output_file)):
-        REPORT_NAME = "{0}_{1}".format(ARGS.output_file, f"{datetime.now():%Y-%m-%d-%S-%s}")
-        ColorPrint.print_warn("\nExisting report detected. Report will be saved as {0}.xlsx".format(
-            REPORT_NAME))
+    
+    REPORT_NAME = "{0}_{1}".format(ARGS.output_file, f"{datetime.now():%Y-%m-%d-%S-%s}")
+#Removed this check so filename is always unique       
+#    if os.path.isfile("{0}.xlsx".format(ARGS.output_file)):
+#        REPORT_NAME = "{0}_{1}".format(ARGS.output_file, f"{datetime.now():%Y-%m-%d-%S-%s}")
+#        ColorPrint.print_warn("\nExisting report detected. Report will be saved as {0}.xlsx".format(
+#            REPORT_NAME))
 
     WB = xlsxwriter.Workbook(
         '{0}.xlsx'.format(REPORT_NAME), {'strings_to_urls': False, 'constant_memory': True})
