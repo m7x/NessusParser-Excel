@@ -104,7 +104,8 @@ ROW_TRACKER = dict()
 SINGLE_FIELDS = ['risk_factor', 'vuln_publication_date', 'description',
                  'plugin_output', 'solution', 'synopsis',
                  'exploit_available', 'exploitability_ease', 'exploited_by_malware',
-                 'plugin_publication_date', 'plugin_modification_date']
+                 'plugin_publication_date', 'plugin_modification_date', 'metasploit_name',
+                 'canvas']
 # Attribute Fields
 ATTRIB_FIELDS = ['severity', 'pluginFamily', 'pluginID', 'pluginName']
 
@@ -256,6 +257,12 @@ def parse_nessus_file(context, func, *args, **kwargs):  # pylint: disable=too-ma
                     for bid in child.iter("bid"):
                         bid_item_list.append(bid.text)
 
+                # ExploitDB ID Per Item
+                edb_item_list = list()
+                if child.find("edb-id") is not None:
+                    for edb in child.iter("edb-id"):
+                        bid_item_list.append(edb.text)
+
                 # Process Info
                 if plugin_id in ['70329']:
                     process_properties = host_properties
@@ -402,55 +409,61 @@ def generate_worksheets():  # pylint: disable=too-many-statements, too-many-bran
             active_ws.write(1, 2, 'IP Address', CENTER_BORDER_FORMAT)
             active_ws.write(1, 3, 'Port', CENTER_BORDER_FORMAT)
             active_ws.write(1, 4, 'FQDN', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 5, 'Vuln Publication Date',
+            active_ws.write(1, 5, 'Severity', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 6, 'Risk Factor', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 7, 'Plugin ID', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 8, 'Plugin Family', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 9, 'Plugin Name', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 10, 'Description', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 11, 'Synopsis', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 12, 'Plugin Output', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 13, 'Solution', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 14, 'Exploit Available', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 15, 'Metasploit Module',
                             CENTER_BORDER_FORMAT)
-            active_ws.write(1, 6, 'Vuln Age by Days', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 7, 'Severity', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 8, 'Risk Factor', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 9, 'Plugin ID', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 10, 'Plugin Family', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 11, 'Plugin Name', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 12, 'Description', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 13, 'Synopsis', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 14, 'Plugin Output', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 15, 'Solution', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 16, 'Exploit Available', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 16, 'Canvas Module',
+                            CENTER_BORDER_FORMAT)
             active_ws.write(1, 17, 'Exploitability Ease', CENTER_BORDER_FORMAT)
             active_ws.write(1, 18, 'Exploited by Malware',
                             CENTER_BORDER_FORMAT)
-            active_ws.write(1, 19, 'Plugin Publication Date',
+            active_ws.write(1, 19, 'Vuln Publication Date',
                             CENTER_BORDER_FORMAT)
-            active_ws.write(1, 20, 'Plugin Modification Date',
+            active_ws.write(1, 20, 'Vuln Age by Days', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 21, 'Plugin Publication Date',
                             CENTER_BORDER_FORMAT)
-            active_ws.write(1, 21, 'CVE Information', CENTER_BORDER_FORMAT)
-            active_ws.write(1, 22, 'Bugtraq ID Information',
+            active_ws.write(1, 22, 'Plugin Modification Date',
+                            CENTER_BORDER_FORMAT)
+            active_ws.write(1, 23, 'CVE Information', CENTER_BORDER_FORMAT)
+            active_ws.write(1, 24, 'Bugtraq ID Information',
                             CENTER_BORDER_FORMAT)
 
             active_ws.freeze_panes('C3')
-            active_ws.autofilter('A2:V2')
+            active_ws.autofilter('A2:Y2')
             active_ws.set_column('A:A', 10)
-            active_ws.set_column('B:B', 35)
+            active_ws.set_column('B:B', 15)
             active_ws.set_column('C:C', 15)
             active_ws.set_column('D:D', 15)
-            active_ws.set_column('E:E', 25)
-            active_ws.set_column('F:F', 20)
+            active_ws.set_column('E:E', 15)
+            active_ws.set_column('F:F', 15)
             active_ws.set_column('G:G', 15)
             active_ws.set_column('H:H', 15)
-            active_ws.set_column('I:I', 25)
-            active_ws.set_column('J:J', 25)
-            active_ws.set_column('K:K', 25)
-            active_ws.set_column('L:L', 100)
-            active_ws.set_column('M:M', 25)
-            active_ws.set_column('N:N', 25)
-            active_ws.set_column('O:O', 25)
-            active_ws.set_column('P:P', 25)
-            active_ws.set_column('Q:Q', 25)
-            active_ws.set_column('R:R', 25)
-            active_ws.set_column('S:S', 25)
-            active_ws.set_column('T:T', 25)
-            active_ws.set_column('U:U', 25)
-            active_ws.set_column('V:V', 25)
-            active_ws.set_column('W:W', 25)
+            active_ws.set_column('I:I', 15)
+            active_ws.set_column('J:J', 15)
+            active_ws.set_column('K:K', 15)
+            active_ws.set_column('L:L', 15)
+            active_ws.set_column('M:M', 15)
+            active_ws.set_column('N:N', 15)
+            active_ws.set_column('O:O', 15)
+            active_ws.set_column('P:P', 15)
+            active_ws.set_column('Q:Q', 15)
+            active_ws.set_column('R:R', 15)
+            active_ws.set_column('S:S', 15)
+            active_ws.set_column('T:T', 15)
+            active_ws.set_column('U:U', 15)
+            active_ws.set_column('V:V', 15)
+            active_ws.set_column('W:W', 15)
+            active_ws.set_column('X:X', 15)
+            active_ws.set_column('Y:Y', 15)
             continue
         if sheet == "CVSS Overview":
             ROW_TRACKER[sheet] = ROW_TRACKER[sheet] + 3
@@ -575,28 +588,60 @@ def generate_worksheets():  # pylint: disable=too-many-statements, too-many-bran
         active_ws.write(1, 2, 'IP Address', CENTER_BORDER_FORMAT)
         active_ws.write(1, 3, 'Port', CENTER_BORDER_FORMAT)
         active_ws.write(1, 4, 'FQDN', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 5, 'Vuln Publication Date', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 6, 'Plugin ID', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 7, 'Plugin Name', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 8, 'Exploit Avaiable', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 9, 'Exploit by Malware', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 10, 'CVE Information', CENTER_BORDER_FORMAT)
-        active_ws.write(1, 11, 'Bugtraq ID Information', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 5, 'Severity', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 6, 'Risk Factor', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 7, 'Plugin ID', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 8, 'Plugin Family', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 9, 'Plugin Name', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 10, 'Description', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 11, 'Synopsis', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 12, 'Plugin Output', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 13, 'Solution', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 14, 'Exploit Available', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 15, 'Metasploit Module',
+                        CENTER_BORDER_FORMAT)
+        active_ws.write(1, 16, 'Canvas Module',
+                        CENTER_BORDER_FORMAT)
+        active_ws.write(1, 17, 'Exploitability Ease', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 18, 'Exploited by Malware',
+                        CENTER_BORDER_FORMAT)
+        active_ws.write(1, 19, 'Vuln Publication Date',
+                        CENTER_BORDER_FORMAT)
+        active_ws.write(1, 20, 'Vuln Age by Days', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 21, 'Plugin Publication Date',
+                        CENTER_BORDER_FORMAT)
+        active_ws.write(1, 22, 'Plugin Modification Date',
+                        CENTER_BORDER_FORMAT)
+        active_ws.write(1, 23, 'CVE Information', CENTER_BORDER_FORMAT)
+        active_ws.write(1, 24, 'Bugtraq ID Information',
+                        CENTER_BORDER_FORMAT)
 
         active_ws.freeze_panes('C3')
-        active_ws.autofilter('A2:J2')
+        active_ws.autofilter('A2:Y2')
         active_ws.set_column('A:A', 10)
-        active_ws.set_column('B:B', 35)
+        active_ws.set_column('B:B', 15)
         active_ws.set_column('C:C', 15)
         active_ws.set_column('D:D', 15)
-        active_ws.set_column('E:E', 35)
+        active_ws.set_column('E:E', 15)
         active_ws.set_column('F:F', 15)
         active_ws.set_column('G:G', 15)
-        active_ws.set_column('H:H', 100)
-        active_ws.set_column('I:I', 25)
-        active_ws.set_column('J:J', 25)
-        active_ws.set_column('K:K', 25)
-        active_ws.set_column('L:L', 25)
+        active_ws.set_column('H:H', 15)
+        active_ws.set_column('I:I', 15)
+        active_ws.set_column('J:J', 15)
+        active_ws.set_column('K:K', 15)
+        active_ws.set_column('L:L', 15)
+        active_ws.set_column('M:M', 15)
+        active_ws.set_column('N:N', 15)
+        active_ws.set_column('O:O', 15)
+        active_ws.set_column('P:P', 15)
+        active_ws.set_column('Q:Q', 15)
+        active_ws.set_column('R:R', 15)
+        active_ws.set_column('S:S', 15)
+        active_ws.set_column('T:T', 15)
+        active_ws.set_column('U:U', 15)
+        active_ws.set_column('V:V', 15)
+        active_ws.set_column('W:W', 15)
+        active_ws.set_column('X:X', 15)
 
     active_ws = None
 
@@ -736,10 +781,10 @@ def add_report_data(report_data_list, the_file):
                 reportitem["vuln_publication_date"], date_format)
             date_two = datetime.strptime(
                 str(date.today()).replace("-", "/"), date_format)
-            report_ws.write(temp_cnt, 6,
+            report_ws.write(temp_cnt, 20,
                             (date_two - date_one).days, NUMBER_FORMAT)
         else:
-            report_ws.write(temp_cnt, 6,
+            report_ws.write(temp_cnt, 20,
                             reportitem["vuln_publication_date"], NUMBER_FORMAT)
         report_ws.write(temp_cnt, 0, temp_cnt - 2, WRAP_TEXT_FORMAT)
         report_ws.write(temp_cnt, 1, the_file, WRAP_TEXT_FORMAT)
@@ -749,39 +794,43 @@ def add_report_data(report_data_list, the_file):
             "port"]), NUMBER_FORMAT)
         report_ws.write(temp_cnt, 4, reportitem[
             'host-fqdn'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 5, reportitem[
-            "vuln_publication_date"], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 7,
+        report_ws.write(temp_cnt, 5,
                         int(reportitem["severity"]), NUMBER_FORMAT)
-        report_ws.write(temp_cnt, 8, reportitem[
+        report_ws.write(temp_cnt, 6, reportitem[
             "risk_factor"], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 9,
+        report_ws.write(temp_cnt, 7,
                         int(reportitem["pluginID"]), NUMBER_FORMAT)
-        report_ws.write(temp_cnt, 10, reportitem[
+        report_ws.write(temp_cnt, 8, reportitem[
             "pluginFamily"], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 11, reportitem[
+        report_ws.write(temp_cnt, 9, reportitem[
             "pluginName"], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 12, reportitem[
+        report_ws.write(temp_cnt, 10, reportitem[
             "description"], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 13, reportitem[
+        report_ws.write(temp_cnt, 11, reportitem[
             'synopsis'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 14, reportitem[
+        report_ws.write(temp_cnt, 12, reportitem[
             'plugin_output'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 15, reportitem[
+        report_ws.write(temp_cnt, 13, reportitem[
             'solution'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 16, reportitem[
+        report_ws.write(temp_cnt, 14, reportitem[
             'exploit_available'], WRAP_TEXT_FORMAT)
+        report_ws.write(temp_cnt, 15, reportitem[
+            'metasploit_name'], NUMBER_FORMAT)
+        report_ws.write(temp_cnt, 16, reportitem[
+            'canvas'], NUMBER_FORMAT)
         report_ws.write(temp_cnt, 17, reportitem[
             'exploitability_ease'], WRAP_TEXT_FORMAT)
         report_ws.write(temp_cnt, 18, reportitem[
             'exploited_by_malware'], WRAP_TEXT_FORMAT)
         report_ws.write(temp_cnt, 19, reportitem[
-            'plugin_publication_date'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 20, reportitem[
-            'plugin_modification_date'], WRAP_TEXT_FORMAT)
+            "vuln_publication_date"], WRAP_TEXT_FORMAT)
         report_ws.write(temp_cnt, 21, reportitem[
-            'cve'], NUMBER_FORMAT)
+            'plugin_publication_date'], WRAP_TEXT_FORMAT)
         report_ws.write(temp_cnt, 22, reportitem[
+            'plugin_modification_date'], WRAP_TEXT_FORMAT)
+        report_ws.write(temp_cnt, 23, reportitem[
+            'cve'], NUMBER_FORMAT)
+        report_ws.write(temp_cnt, 24, reportitem[
             'bid'], NUMBER_FORMAT)
 
         temp_cnt += 1
@@ -873,16 +922,44 @@ def add_vuln_info(vuln_list, the_file):
             vuln_ws.write(temp_cnt, 2, vuln['host-ip'], WRAP_TEXT_FORMAT)
             vuln_ws.write(temp_cnt, 3, int(vuln['port']), NUMBER_FORMAT)
             vuln_ws.write(temp_cnt, 4, vuln['host-fqdn'], WRAP_TEXT_FORMAT)
-            vuln_ws.write(temp_cnt, 5, vuln[
-                'vuln_publication_date'], WRAP_TEXT_FORMAT)
-            vuln_ws.write(temp_cnt, 6, int(vuln['pluginID']), NUMBER_FORMAT)
-            vuln_ws.write(temp_cnt, 7, vuln['pluginName'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 5,
+                            int(vuln["severity"]), NUMBER_FORMAT)
+            vuln_ws.write(temp_cnt, 6, vuln[
+                "risk_factor"], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 7,
+                            int(vuln["pluginID"]), NUMBER_FORMAT)
             vuln_ws.write(temp_cnt, 8, vuln[
-                'exploit_available'], WRAP_TEXT_FORMAT)
+                "pluginFamily"], WRAP_TEXT_FORMAT)
             vuln_ws.write(temp_cnt, 9, vuln[
+                "pluginName"], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 10, vuln[
+                "description"], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 11, vuln[
+                'synopsis'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 12, vuln[
+                'plugin_output'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 13, vuln[
+                'solution'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 14, vuln[
+                'exploit_available'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 15, vuln[
+                'metasploit_name'], NUMBER_FORMAT)
+            vuln_ws.write(temp_cnt, 16, vuln[
+                'canvas'], NUMBER_FORMAT)
+            vuln_ws.write(temp_cnt, 17, vuln[
+                'exploitability_ease'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 18, vuln[
                 'exploited_by_malware'], WRAP_TEXT_FORMAT)
-            vuln_ws.write(temp_cnt, 10, vuln['cve'], WRAP_TEXT_FORMAT)
-            vuln_ws.write(temp_cnt, 11, vuln['bid'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 19, vuln[
+                "vuln_publication_date"], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 21, vuln[
+                'plugin_publication_date'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 22, vuln[
+                'plugin_modification_date'], WRAP_TEXT_FORMAT)
+            vuln_ws.write(temp_cnt, 23, vuln[
+                'cve'], NUMBER_FORMAT)
+            vuln_ws.write(temp_cnt, 24, vuln[
+                'bid'], NUMBER_FORMAT)
             temp_cnt += 1
         ROW_TRACKER[value] = temp_cnt
 
