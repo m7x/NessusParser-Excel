@@ -388,8 +388,8 @@ def generate_worksheets():  # pylint: disable=too-many-statements, too-many-bran
     ColorPrint.print_pass("\nGenerating the worksheets")
     ws_names = ["Overview", "Graphs", "Full Report",
                 "CVSS Overview", "Device Type", "Critical",
-                "High", "Medium", "Low",
-                "Informational",
+                "High", "Medium", "Low", "Informational",
+                "Missing Windows Updates",
                 "Plugin Counts", "Graph Data"]
     for sheet in ws_names:
         ColorPrint.print_bold("\tCreating {0} worksheet".format(sheet))
@@ -766,76 +766,82 @@ def add_report_data(report_data_list, the_file):
         Function responsible for inserting data into the Full Report
         worksheet
     """
-    ColorPrint.print_bold("\tInserting data into Full Report worksheet")
-    # Retrieve correct worksheet from out Worksheet tracker
-    report_ws = WS_MAPPER['Full Report']
-    # Resume inserting rows at our last unused row
-    temp_cnt = ROW_TRACKER['Full Report']
-    # Iterate over out VULN List and insert records to worksheet
-    for reportitem in report_data_list:
-        # If we have a valid Vulnerability publication date
-        # lets generate the Days old cell value
-        if reportitem["vuln_publication_date"] != '':
-            date_format = "%Y/%m/%d"
-            date_one = datetime.strptime(
-                reportitem["vuln_publication_date"], date_format)
-            date_two = datetime.strptime(
-                str(date.today()).replace("-", "/"), date_format)
-            report_ws.write(temp_cnt, 20,
-                            (date_two - date_one).days, NUMBER_FORMAT)
-        else:
-            report_ws.write(temp_cnt, 20,
-                            reportitem["vuln_publication_date"], NUMBER_FORMAT)
-        report_ws.write(temp_cnt, 0, temp_cnt - 2, WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 1, the_file, WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 2, reportitem[
-            'host-ip'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 3, int(reportitem[
-            "port"]), NUMBER_FORMAT)
-        report_ws.write(temp_cnt, 4, reportitem[
-            'host-fqdn'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 5,
-                        int(reportitem["severity"]), NUMBER_FORMAT)
-        report_ws.write(temp_cnt, 6, reportitem[
-            "risk_factor"], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 7,
-                        int(reportitem["pluginID"]), NUMBER_FORMAT)
-        report_ws.write(temp_cnt, 8, reportitem[
-            "pluginFamily"], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 9, reportitem[
-            "pluginName"], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 10, reportitem[
-            "description"], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 11, reportitem[
-            'synopsis'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 12, reportitem[
-            'plugin_output'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 13, reportitem[
-            'solution'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 14, reportitem[
-            'exploit_available'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 15, reportitem[
-            'metasploit_name'], NUMBER_FORMAT)
-        report_ws.write(temp_cnt, 16, reportitem[
-            'canvas'], NUMBER_FORMAT)
-        report_ws.write(temp_cnt, 17, reportitem[
-            'exploitability_ease'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 18, reportitem[
-            'exploited_by_malware'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 19, reportitem[
-            "vuln_publication_date"], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 21, reportitem[
-            'plugin_publication_date'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 22, reportitem[
-            'plugin_modification_date'], WRAP_TEXT_FORMAT)
-        report_ws.write(temp_cnt, 23, reportitem[
-            'cve'], NUMBER_FORMAT)
-        report_ws.write(temp_cnt, 24, reportitem[
-            'bid'], NUMBER_FORMAT)
+    for value in ['Full Report','Missing Windows Updates']:
+        ColorPrint.print_bold("\tInserting data into "+value+" worksheet")
+        # Retrieve correct worksheet from out Worksheet tracker
+        report_ws = WS_MAPPER[value]
+        # Resume inserting rows at our last unused row
+        temp_cnt = ROW_TRACKER[value]
+        # Iterate over out VULN List and insert records to worksheet
+        for reportitem in report_data_list:
+            # If we a Microsoft Bulletins
+            # lets generate the Missing Windows Updates tab
+            if value == 'Missing Windows Updates':
+                if not str(reportitem['pluginFamily']) == "Windows : Microsoft Bulletins":
+                    continue
+            # If we have a valid Vulnerability publication date
+            # lets generate the Days old cell value
+            if reportitem["vuln_publication_date"] != '':
+                date_format = "%Y/%m/%d"
+                date_one = datetime.strptime(
+                    reportitem["vuln_publication_date"], date_format)
+                date_two = datetime.strptime(
+                    str(date.today()).replace("-", "/"), date_format)
+                report_ws.write(temp_cnt, 20,
+                                (date_two - date_one).days, NUMBER_FORMAT)
+            else:
+                report_ws.write(temp_cnt, 20,
+                                reportitem["vuln_publication_date"], NUMBER_FORMAT)
+            report_ws.write(temp_cnt, 0, temp_cnt - 2, WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 1, the_file, WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 2, reportitem[
+                'host-ip'], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 3, int(reportitem[
+                "port"]), NUMBER_FORMAT)
+            report_ws.write(temp_cnt, 4, reportitem[
+                'host-fqdn'], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 5,
+                            int(reportitem["severity"]), NUMBER_FORMAT)
+            report_ws.write(temp_cnt, 6, reportitem[
+                "risk_factor"], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 7,
+                            int(reportitem["pluginID"]), NUMBER_FORMAT)
+            report_ws.write(temp_cnt, 8, reportitem[
+                "pluginFamily"], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 9, reportitem[
+                "pluginName"], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 10, reportitem[
+                "description"], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 11, reportitem[
+                'synopsis'], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 12, reportitem[
+                'plugin_output'], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 13, reportitem[
+                'solution'], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 14, reportitem[
+                'exploit_available'], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 15, reportitem[
+                'metasploit_name'], NUMBER_FORMAT)
+            report_ws.write(temp_cnt, 16, reportitem[
+                'canvas'], NUMBER_FORMAT)
+            report_ws.write(temp_cnt, 17, reportitem[
+                'exploitability_ease'], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 18, reportitem[
+                'exploited_by_malware'], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 19, reportitem[
+                "vuln_publication_date"], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 21, reportitem[
+                'plugin_publication_date'], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 22, reportitem[
+                'plugin_modification_date'], WRAP_TEXT_FORMAT)
+            report_ws.write(temp_cnt, 23, reportitem[
+                'cve'], NUMBER_FORMAT)
+            report_ws.write(temp_cnt, 24, reportitem[
+                'bid'], NUMBER_FORMAT)
 
-        temp_cnt += 1
-    # Save the last unused row for use on the next Nessus file
-    ROW_TRACKER['Full Report'] = temp_cnt
+            temp_cnt += 1
+        # Save the last unused row for use on the next Nessus file
+        ROW_TRACKER[value] = temp_cnt
 
 
 def add_cvss_info(cvss_data, the_file):
