@@ -1,3 +1,5 @@
+This is a fork of [NessusParser-Excel](https://github.com/TheSecEng/NessusParser-Excel)
+
 # NessusParser
 
 Python based nessus parser that converts NessusV2 files into formatted XLSX documents.
@@ -31,6 +33,10 @@ Inspiration of this came from [Nessus Parser - Cody](http://www.melcara.com/arch
 
 
 #### Updates
+
+##### Version 0.3.7
+ - Add Missing Windows Updates sheet
+ - Add Old Versions of Third Party Software sheet
 
 ##### Version 0.3.6
 
