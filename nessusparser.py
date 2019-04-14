@@ -390,6 +390,7 @@ def generate_worksheets():  # pylint: disable=too-many-statements, too-many-bran
                 "CVSS Overview", "Device Type", "Critical",
                 "High", "Medium", "Low", "Informational",
                 "Missing Windows Updates",
+                "Old Versions of 3Party Software",
                 "Plugin Counts", "Graph Data"]
     for sheet in ws_names:
         ColorPrint.print_bold("\tCreating {0} worksheet".format(sheet))
@@ -766,7 +767,7 @@ def add_report_data(report_data_list, the_file):
         Function responsible for inserting data into the Full Report
         worksheet
     """
-    for value in ['Full Report','Missing Windows Updates']:
+    for value in ['Full Report','Missing Windows Updates','Old Versions of 3Party Software']:
         ColorPrint.print_bold("\tInserting data into "+value+" worksheet")
         # Retrieve correct worksheet from out Worksheet tracker
         report_ws = WS_MAPPER[value]
@@ -774,13 +775,28 @@ def add_report_data(report_data_list, the_file):
         temp_cnt = ROW_TRACKER[value]
         # Iterate over out VULN List and insert records to worksheet
         for reportitem in report_data_list:
-            # If we a Microsoft Bulletins
-            # lets generate the Missing Windows Updates tab
+            # If we have a Microsoft Bulletins
+            # let's generate the Missing Windows Updates tab
             if value == 'Missing Windows Updates':
-                if not str(reportitem['pluginFamily']) == "Windows : Microsoft Bulletins":
+                # Remove all vulns that do not have Microsoft Bulletins as pluginFamily or
+                # have None as severity
+                if (not str(reportitem['pluginFamily']) == "Windows : Microsoft Bulletins" or
+                    str(reportitem['severity']) == "0") :
+                    continue
+            # if we have Old Versions of 3Party Software
+            # let's generate a tab
+            if value == 'Old Versions of 3Party Software':
+                # Remove all vulns that do not have Windows as pluginFamily or 
+                # have the keyword Windows, Microsoft or MS in plugin name or
+                # have None as severity
+                if (not str(reportitem['pluginFamily']) == "Windows" or 
+                        re.search('.*Windows.*', reportitem['pluginName']) or 
+                        re.search('.*Microsoft.*', reportitem['pluginName']) or 
+                        re.search('^MS.*',reportitem['pluginName']) or
+                        str(reportitem['severity']) == "0"):
                     continue
             # If we have a valid Vulnerability publication date
-            # lets generate the Days old cell value
+            # let's generate the Days old cell value
             if reportitem["vuln_publication_date"] != '':
                 date_format = "%Y/%m/%d"
                 date_one = datetime.strptime(
